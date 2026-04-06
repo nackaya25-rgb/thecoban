@@ -82,14 +82,39 @@ body {
 
 .hero-video {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  min-width: 100%;
-  min-height: 100%;
-  width: auto;
-  height: auto;
-  transform: translate(-50%, -50%);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
+  object-position: center center;
+}
+
+.sound-toggle {
+  position: absolute;
+  bottom: 5rem;
+  right: 2rem;
+  z-index: 3;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.4);
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(10px);
+  color: white;
+  font-size: 1.3rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sound-toggle:hover {
+  background: rgba(0,0,0,0.6);
+  border-color: rgba(255,255,255,0.7);
+  transform: scale(1.1);
 }
 
 .hero::before {
@@ -1845,10 +1870,11 @@ footer {
 <!-- HERO -->
 <section class="hero" id="anasayfa">
   <div class="hero-video-wrap">
-    <video class="hero-video" autoplay muted loop playsinline preload="auto" poster="1.jpg">
+    <video class="hero-video" id="heroVideo" autoplay muted loop playsinline preload="auto" poster="1.jpg">
       <source src="hero-video.mp4" type="video/mp4">
     </video>
   </div>
+  <button class="sound-toggle" id="soundToggle" type="button" aria-label="Ses Aç/Kapat">🔇</button>
   <div class="hero-pattern"></div>
   <div class="hero-content">
     <h1 class="hero-brand">THE ÇOBAN</h1>
@@ -2255,16 +2281,31 @@ function sendWhatsApp() {
   window.open('https://wa.me/905541162987?text=' + mesaj, '_blank');
 }
 
-// Hero Video - ensure autoplay on mobile
+// Hero Video - ensure autoplay on mobile + sound toggle
 (function() {
-  var video = document.querySelector('.hero-video');
+  var video = document.getElementById('heroVideo');
+  var soundBtn = document.getElementById('soundToggle');
+  
   if (video) {
     video.play().catch(function() {
-      // Autoplay blocked, try on first user interaction
       document.addEventListener('touchstart', function playOnce() {
         video.play();
         document.removeEventListener('touchstart', playOnce);
       }, { once: true });
+    });
+  }
+  
+  if (soundBtn && video) {
+    soundBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (video.muted) {
+        video.muted = false;
+        soundBtn.textContent = '🔊';
+      } else {
+        video.muted = true;
+        soundBtn.textContent = '🔇';
+      }
     });
   }
 })();
