@@ -73,30 +73,24 @@ body {
   overflow: hidden;
 }
 
-.hero-slideshow {
+.hero-video-wrap {
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
   z-index: 0;
+  overflow: hidden;
 }
 
-.hero-slide {
+.hero-video {
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-size: cover;
-  background-position: center 30%;
-  opacity: 0;
-  transition: opacity 1.5s ease-in-out;
+  top: 50%;
+  left: 50%;
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: auto;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
 }
-
-.hero-slide.active {
-  opacity: 1;
-}
-
-.hero-slide:nth-child(1) { background-image: url('1.jpg'); }
-.hero-slide:nth-child(2) { background-image: url('2.jpg'); }
-.hero-slide:nth-child(3) { background-image: url('3.jpg'); }
-.hero-slide:nth-child(4) { background-image: url('4.jpg'); }
-.hero-slide:nth-child(5) { background-image: url('5.jpg'); background-position: center 35%; }
 
 .hero::before {
   content: '';
@@ -1850,12 +1844,10 @@ footer {
 
 <!-- HERO -->
 <section class="hero" id="anasayfa">
-  <div class="hero-slideshow">
-    <div class="hero-slide active"></div>
-    <div class="hero-slide"></div>
-    <div class="hero-slide"></div>
-    <div class="hero-slide"></div>
-    <div class="hero-slide"></div>
+  <div class="hero-video-wrap">
+    <video class="hero-video" autoplay muted loop playsinline preload="auto" poster="1.jpg">
+      <source src="hero-video.mp4" type="video/mp4">
+    </video>
   </div>
   <div class="hero-pattern"></div>
   <div class="hero-content">
@@ -2263,14 +2255,19 @@ function sendWhatsApp() {
   window.open('https://wa.me/905541162987?text=' + mesaj, '_blank');
 }
 
-// Hero Slideshow
-var slides = document.querySelectorAll('.hero-slide');
-var currentSlide = 0;
-setInterval(function() {
-  slides[currentSlide].classList.remove('active');
-  currentSlide = (currentSlide + 1) % slides.length;
-  slides[currentSlide].classList.add('active');
-}, 4000);
+// Hero Video - ensure autoplay on mobile
+(function() {
+  var video = document.querySelector('.hero-video');
+  if (video) {
+    video.play().catch(function() {
+      // Autoplay blocked, try on first user interaction
+      document.addEventListener('touchstart', function playOnce() {
+        video.play();
+        document.removeEventListener('touchstart', playOnce);
+      }, { once: true });
+    });
+  }
+})();
 
 // Navbar scroll
 window.addEventListener('scroll', function() {
