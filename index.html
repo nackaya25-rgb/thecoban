@@ -460,13 +460,32 @@ nav.scrolled .nav-bottom {
   background: none;
   border: none;
   cursor: pointer;
+  padding: 10px;
+  z-index: 9999;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .mobile-toggle span {
+  display: block;
   width: 28px;
-  height: 2px;
+  height: 3px;
   background: white;
   transition: 0.3s;
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.mobile-toggle.active span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 6px);
+}
+
+.mobile-toggle.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.mobile-toggle.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -6px);
 }
 
 .mobile-social-links {
@@ -1420,20 +1439,17 @@ footer {
   .nav-bottom {
     display: none;
     flex-direction: column;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
     background: rgba(27,50,15,0.98);
     backdrop-filter: blur(20px);
     border-top: 1px solid rgba(255,255,255,0.1);
     padding: 0;
+    width: 100%;
   }
   .nav-bottom.open {
-    display: flex;
+    display: flex !important;
   }
-  .nav-social { display: none; }
-  .mobile-toggle { display: flex; }
+  .nav-social { display: none !important; }
+  .mobile-toggle { display: flex !important; }
 
   .nav-top {
     padding: 0.5rem 1.5rem;
@@ -1812,7 +1828,7 @@ footer {
         <li><a href="https://www.youtube.com/watch?v=M9HKj67ZJak&t=869s" target="_blank" class="nav-trt">🎬 TRT Belgeselimiz</a></li>
         <li><a href="https://maps.app.goo.gl/CMoDUutDHwhaGavS8" target="_blank" class="nav-location">📍 Konum</a></li>
       </ul>
-      <button class="mobile-toggle" onclick="document.querySelector('.nav-bottom').classList.toggle('open')">
+      <button class="mobile-toggle" id="mobileToggle" type="button" aria-label="Menü">
         <span></span><span></span><span></span>
       </button>
     </div>
@@ -2199,52 +2215,89 @@ footer {
 <a href="https://wa.me/905541162987" class="wp-float" target="_blank" title="WhatsApp ile mesaj gönderin">💬</a>
 
 <script>
+// Mobile Menu Toggle
+(function() {
+  var toggleBtn = document.getElementById('mobileToggle');
+  var navBottom = document.querySelector('.nav-bottom');
+  
+  if (toggleBtn && navBottom) {
+    toggleBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      navBottom.classList.toggle('open');
+      toggleBtn.classList.toggle('active');
+    });
+    
+    // Close menu when clicking a nav link
+    var navLinks = navBottom.querySelectorAll('a');
+    for (var i = 0; i < navLinks.length; i++) {
+      navLinks[i].addEventListener('click', function() {
+        navBottom.classList.remove('open');
+        toggleBtn.classList.remove('active');
+      });
+    }
+    
+    // Close menu when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!navBottom.contains(e.target) && !toggleBtn.contains(e.target)) {
+        navBottom.classList.remove('open');
+        toggleBtn.classList.remove('active');
+      }
+    });
+  }
+})();
+
 // WhatsApp Sipariş Gönder
 function sendWhatsApp() {
-  const form = document.querySelector('.contact-form');
-  const inputs = form.querySelectorAll('input, select, textarea');
-  const ad = inputs[0].value || 'Belirtilmedi';
-  const tel = inputs[1].value || 'Belirtilmedi';
-  const urun = inputs[2].value || 'Belirtilmedi';
-  const adres = inputs[3].value || 'Belirtilmedi';
-  const miktar = inputs[4].value || 'Belirtilmedi';
-  const not = inputs[5].value || 'Yok';
+  var form = document.querySelector('.contact-form');
+  var inputs = form.querySelectorAll('input, select, textarea');
+  var ad = inputs[0].value || 'Belirtilmedi';
+  var tel = inputs[1].value || 'Belirtilmedi';
+  var urun = inputs[2].value || 'Belirtilmedi';
+  var adres = inputs[3].value || 'Belirtilmedi';
+  var miktar = inputs[4].value || 'Belirtilmedi';
+  var not2 = inputs[5].value || 'Yok';
   
-  const mesaj = `🐑 *THE ÇOBAN - Yeni Sipariş*%0A%0A👤 *Ad Soyad:* ${ad}%0A📞 *Telefon:* ${tel}%0A📦 *Ürün:* ${urun}%0A📍 *Adres:* ${adres}%0A📏 *Miktar:* ${miktar}%0A📝 *Not:* ${not}`;
+  var mesaj = '🐑 *THE ÇOBAN - Yeni Sipariş*%0A%0A👤 *Ad Soyad:* ' + ad + '%0A📞 *Telefon:* ' + tel + '%0A📦 *Ürün:* ' + urun + '%0A📍 *Adres:* ' + adres + '%0A📏 *Miktar:* ' + miktar + '%0A📝 *Not:* ' + not2;
   
-  window.open(`https://wa.me/905541162987?text=${mesaj}`, '_blank');
+  window.open('https://wa.me/905541162987?text=' + mesaj, '_blank');
 }
 
 // Hero Slideshow
-const slides = document.querySelectorAll('.hero-slide');
-let currentSlide = 0;
-setInterval(() => {
+var slides = document.querySelectorAll('.hero-slide');
+var currentSlide = 0;
+setInterval(function() {
   slides[currentSlide].classList.remove('active');
   currentSlide = (currentSlide + 1) % slides.length;
   slides[currentSlide].classList.add('active');
 }, 4000);
 
 // Navbar scroll
-window.addEventListener('scroll', () => {
-  const nav = document.getElementById('navbar');
-  nav.classList.toggle('scrolled', window.scrollY > 80);
+window.addEventListener('scroll', function() {
+  var nav = document.getElementById('navbar');
+  if (window.scrollY > 80) {
+    nav.classList.add('scrolled');
+  } else {
+    nav.classList.remove('scrolled');
+  }
 });
 
-// Smooth scroll
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+// Smooth scroll for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
   anchor.addEventListener('click', function(e) {
     e.preventDefault();
-    const target = document.querySelector(this.getAttribute('href'));
+    var href = this.getAttribute('href');
+    if (href === '#') return;
+    var target = document.querySelector(href);
     if (target) {
       target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      document.querySelector('.nav-bottom').classList.remove('open');
     }
   });
 });
 
 // Animate on scroll
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
+var observer = new IntersectionObserver(function(entries) {
+  entries.forEach(function(entry) {
     if (entry.isIntersecting) {
       entry.target.style.opacity = '1';
       entry.target.style.transform = 'translateY(0)';
@@ -2252,7 +2305,7 @@ const observer = new IntersectionObserver((entries) => {
   });
 }, { threshold: 0.1 });
 
-document.querySelectorAll('.product-card, .hisseli-card, .testimonial-card, .info-card, .stat-card').forEach(el => {
+document.querySelectorAll('.product-card, .hisseli-card, .testimonial-card, .info-card, .stat-card').forEach(function(el) {
   el.style.opacity = '0';
   el.style.transform = 'translateY(30px)';
   el.style.transition = 'all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
